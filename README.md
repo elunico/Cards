@@ -16,3 +16,4 @@ You may:
 Provided you:
 * Maintain attribution of the work to the original author (me)
 * Do not sell it or use it for commercial use
+* Use this same license when redistributing
