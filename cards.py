@@ -3,6 +3,7 @@
 # September 6, 2015
 # License: CC BY-SA-NC
 import random
+import os
 
 
 class Deck (object):
@@ -171,13 +172,13 @@ class Deck (object):
         numbers1.sort()
         numbers2.sort()
         if h1 == 'Royal Flush' and h2 == 'Royal Flush':
-            return 'Tie'
+            return 'Tie', 0
         
         if h1 == "Straigth Flush" or h1 == "Flush" or h1 == "Straight":
             if numbers1[-1] > numbers2[-1]:
                 return "First Hand", eval_h1
             elif numbers1[-1] == numbers2[-1]:
-                return "Tie"
+                return "Tie", 0
             else:
                 return "Second Hand", eval_h2
         if self.evaluate_hand(h1) == 'Full House':
@@ -196,12 +197,12 @@ class Deck (object):
                 if numbers1[-h1s] > numbers2[-h2s]  : # by using the negative you choose the end if it was the beginning or the beginning if it was the end i.e. list[1] = list[-4] list[4] = list[-1] when length is five
                     return "First Hand", eval_h1
                 elif numbers1[-h1s] == numbers2[-h2s]  :
-                    return "Tie"
+                    return "Tie", 0
                 elif numbers1[-h1s] < numbers2[-h2s] :
                     return "Second Hand", eval_h2
             elif numbers1[h1s] < numbers2[h2s] :
                 return "Second Hand", eval_h2
-        return "Tie"
+        return "Tie", 0
     
     def choosewinner(self, hand, hand2):
         h1 = self.evaluate_hand(hand)
@@ -218,14 +219,14 @@ class Deck (object):
                 if h1 > h2:
                     return "First hand", h1
                 elif h1 < h2:
-                    return ("Second hand", h2)
+                    return "Second hand", h2
                 else:
-                    return "Tie"
+                    return "Tie", 0
             except Exception as e:
                 if isinstance(h1, str):
                     return "First hand", h1
                 else:
-                    return ("Second hand", h2)
+                    return "Second hand", h2
     
     def fold(self, hand):
         if isinstance(hand, tuple):
@@ -258,9 +259,10 @@ class Deck (object):
             print("{}{}".format(faces[i[0]], suit[i[1]]), end=" ")
         print()
     
-    def exchange_cards(self, hand, name=None):
-        print("Exchange cards for the following hands")
-        self.show_hand(hand, name)
+    def exchange_cards(self, hand, money, name=None):
+        
+        print("Exchange cards for the your hands")
+        #self.show_hand(hand, name)
         nums = input("Enter the number of the cards to exchange\n"
                      "Starting with 1 ending with 5 (0 to hold): ")
         nums = nums.strip()
@@ -283,24 +285,38 @@ def main():
     input("Welcome to Texas Hold Em. Press enter to start_ ")
     deck = Deck()
     name = input("Enter your name: ")
+    money = 10000
     while not cont:
         usr = deck.deal(5)
         cpu = deck.deal(5)
         print("Here is your hand")
+        deck.show_hand(usr)
+        bet = int(input("Total funds: %i\nenter a bet (1 - 5): " % money))
         deck.exchange_cards(usr, name)
         
         winner, winning = deck.choosewinner(usr, cpu)
+        amount = deck.winninghands.get(winning, winning) * bet
         if winner == 'Second hand':
             print("You lose. CPU had %s" % winning)
             print("You: ", end=''); deck.show_hand(usr, name)
             print("CPU: ", end=''); deck.show_hand(cpu, "CPU")
+            money -= amount
+            print("you lost: $%i" % amount)
+
         elif winner == 'First hand':
             print("You won. You had %s" % winning)
             print("You: ", end=''); deck.show_hand(usr, name)
             print("CPU: ", end=''); deck.show_hand(cpu, "CPU")
+            money += amount
+            print("you won: $%i" % amount)
+        elif winner == "Tie":
+            print("Tie")
+            print("You: ", end=''); deck.show_hand(usr, name)
+            print("CPU: ", end=''); deck.show_hand(cpu, "CPU")
+            print("You won $0")
         
         cont = input("Enter to play again or 'quit' to quit: ")
-        print()
+        os.system('clear')
 
 if __name__ == "__main__":
     main()
