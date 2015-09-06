@@ -283,7 +283,7 @@ class Deck (object):
 def main():
     cont = False
     input("Welcome to Texas Hold Em. Press enter to start_ ")
-    deck = Deck()
+    deck = Deck(3)
     name = input("Enter your name: ")
     money = 10000
     while not cont:
@@ -314,6 +314,8 @@ def main():
             print("You: ", end=''); deck.show_hand(usr, name)
             print("CPU: ", end=''); deck.show_hand(cpu, "CPU")
             print("You won $0")
+        deck.fold(usr)
+        deck.fold(cpu)
         
         cont = input("Enter to play again or 'quit' to quit: ")
         os.system('clear')
