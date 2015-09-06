@@ -1,0 +1,3 @@
+## Issues
+
+* Ties occur when they shouldn't mostly in cases of pairs or X-of-a-kinds
