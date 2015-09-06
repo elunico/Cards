@@ -1,4 +1,4 @@
-# Thomas Povinelli
+1# Thomas Povinelli
 # Cards.py
 # September 6, 2015
 # License: CC BY-SA-NC
@@ -316,6 +316,10 @@ def main():
             print("You won $0")
         deck.fold(usr)
         deck.fold(cpu)
+        if money <= 0:
+            print("You ran out of money!")
+            print("Game over")
+            break
         
         cont = input("Enter to play again or 'quit' to quit: ")
         os.system('clear')
