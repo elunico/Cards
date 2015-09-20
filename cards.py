@@ -3,7 +3,7 @@
 # September 6, 2015
 # License: CC BY-SA-NC
 import random
-import os
+import subprocess
 
 
 class Deck (object):
@@ -322,7 +322,7 @@ def main():
             break
         
         cont = input("Enter to play again or 'quit' to quit: ")
-        os.system('clear')
+        subprocess.call('clear')
 
 if __name__ == "__main__":
     main()
