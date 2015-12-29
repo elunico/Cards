@@ -1,47 +1,53 @@
-1# Thomas Povinelli
+# Thomas Povinelli
 # Cards.py
 # September 6, 2015
 # License: CC BY-SA-NC
 import random
 import subprocess
 
+class EmptyDeckError(BaseException):
+    pass
 
 class Deck (object):
     def __init__(self, decks=1, aceishigh=True):
+        self.numdecks = decks
         self.aceishigh = aceishigh
         self.cards = [2, 3, 4, 5, 6, 7, 8, 9, 10, "Jack", "Queen", "King", "Ace"]
         self.suits = ["Diamonds", "Hearts", "Spades", "Clubs"]
         self.faces = ["Jack", "Queen", "King", "Ace"]
         self.royal = [10] + self.faces
         self.fulldeck = []
-        self.winninghands = {'Royal Flush':100, "Straight Flush":90, "Four of a Kind":80, 'Full House':70, 
+        self.winninghands = {'Royal Flush':100, "Straight Flush":90, "Four of a Kind":80, 'Full House':70,
                              "Flush":60, "Straight":50, 'Three of a Kind':40, "Two Pair": 30, "One Pair":20, "High Card":15}
-        if aceishigh: 
+        if aceishigh:
             self.cardvalues = {2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9, 10:10, "Jack":11, "Queen":12, "King":13, "Ace":14}
         else:
             self.cardvalues = {2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9, 10:10, "Jack":11, "Queen":12, "King":13, "Ace":1}
         for h in self.suits:
             for i in self.cards:
                 self.fulldeck.append((i, h))
-        
+
         for i in range(decks-1):
             self.fulldeck += self.fulldeck
-        
+
         self.workingdeck = self.fulldeck[:]
-    
+
     def pick_a_card(self):
+        if not self.workingdeck:
+            raise EmptyDeckError("There are no cards left in this deck")
         card = (random.choice(self.workingdeck))
         self.workingdeck.remove(card)
         return card
-     
+
     def deal(self, number):
+        if len(self.workingdeck) < number:
+            raise EmptyDeckError("There are not enough cards left in this deck.")
         cards = []
         for i in range(number):
-            card = random.choice(self.workingdeck)
+            card = self.pick_a_card()
             cards.append(card)
-            self.workingdeck.remove(card)
         return cards
-    
+
     def evaluate_hand(self, hand):
         twopair = False
         onepair = False
@@ -52,18 +58,18 @@ class Deck (object):
                 royalflush = False
                 royalstraight = False
                 break
-            
-        
+
+
         # Flush
         if hand[0][1] == hand[1][1] == hand[2][1] == hand[3][1] == hand[4][1]:
             flush = True
         else:
             flush = False
-        
+
         numbers = []
         for i in hand:
             numbers.append(i[0])
-        
+
         snums = [self.cardvalues[i] for i in numbers]
         snums.sort()
         for i in range(len(snums)-1):
@@ -74,19 +80,19 @@ class Deck (object):
                     break
             except Exception as e:
                 pass
-        
+
         if flush == True and royalstraight == True:
             royalflush = True
         else:
             royalflush = False
-            
+
         if flush == True and straight == True:
             straightflush = True
         else:
             straightflush = False
-        
-        
-        
+
+
+
         for i in numbers:
             fourofakind = False
             threeofakind = False
@@ -95,7 +101,7 @@ class Deck (object):
                 fourofakind = True
                 break
             if numbers.count(i) == 3:
-                threeofakind = True 
+                threeofakind = True
                 break
             if numbers.count(i) == 2:
                 couldbetwo = True
@@ -103,12 +109,12 @@ class Deck (object):
                 break
         if couldbetwo:
             for i in numbers:
-                onepair = True 
+                onepair = True
                 twopair = False
                 if numbers.count(i) == 2 and i != firstpair:
                     twopair = True
                     break
-        
+
         fullhouse = False
         couldfull = False
         for i in numbers:
@@ -120,15 +126,15 @@ class Deck (object):
             if numbers.count(i) == 2:
                 couldfull = True
                 used = i
-                counted = 2 
+                counted = 2
                 break
-                
+
         if couldfull:
             neededvalue = 3 if counted == 2 else 2
             for i in numbers:
                 if numbers.count(i) == neededvalue and i != used:
                     fullhouse = True
-        
+
         maxi = 0
         for i in numbers:
             if self.cardvalues[i] > maxi:
@@ -137,7 +143,7 @@ class Deck (object):
             maxi = int(maxi)
         except:
             pass
-        
+
         if royalflush:
             return "Royal Flush"
         if straightflush:
@@ -157,7 +163,7 @@ class Deck (object):
         if onepair:
             return "One Pair"
         return maxi
-    
+
     def breakTie(self, h1, h2):
         numbers1 = []
         numbers2 = []
@@ -165,15 +171,15 @@ class Deck (object):
         eval_h2 = self.evaluate_hand(h2)
         for i in h1:
             numbers1.append(self.cardvalues[i[0]])
-        
+
         for i in h2:
             numbers2.append(self.cardvalues[i[0]])
-        
+
         numbers1.sort()
         numbers2.sort()
         if h1 == 'Royal Flush' and h2 == 'Royal Flush':
             return 'Tie', 0
-        
+
         if h1 == "Straigth Flush" or h1 == "Flush" or h1 == "Straight":
             if numbers1[-1] > numbers2[-1]:
                 return "First Hand", eval_h1
@@ -182,7 +188,7 @@ class Deck (object):
             else:
                 return "Second Hand", eval_h2
         if self.evaluate_hand(h1) == 'Full House':
-            
+
             if numbers1[0] == numbers1[1] == numbers1[2]:
                 h1s = 1
             else:
@@ -203,7 +209,7 @@ class Deck (object):
             elif numbers1[h1s] < numbers2[h2s] :
                 return "Second Hand", eval_h2
         return "Tie", 0
-    
+
     def choosewinner(self, hand, hand2):
         h1 = self.evaluate_hand(hand)
         h2 = self.evaluate_hand(hand2)
@@ -227,13 +233,13 @@ class Deck (object):
                     return "First hand", h1
                 else:
                     return "Second hand", h2
-    
+
     def fold(self, hand):
         if isinstance(hand, tuple):
             hand = [hand]
         for i in hand:
             self.workingdeck.append(i)
-    
+
     def print_hand(self, hand, name=None):
         if isinstance(hand, tuple):
             hand = [hand]
@@ -244,7 +250,7 @@ class Deck (object):
             print()
         for i in hand:
             print("The {} of {}".format(i[0], i[1]))
-    
+
     def show_hand(self, hand, name=None):
         if isinstance(hand, tuple):
             hand = [hand]
@@ -258,9 +264,9 @@ class Deck (object):
             suit = {"Diamonds":"⬥", "Hearts":"♥︎", "Spades":"♠︎", "Clubs":"♣︎"}
             print("{}{}".format(faces[i[0]], suit[i[1]]), end=" ")
         print()
-    
+
     def exchange_cards(self, hand, money, name=None):
-        
+
         print("Exchange cards for the your hands")
         #self.show_hand(hand, name)
         nums = input("Enter the number of the cards to exchange\n"
@@ -279,7 +285,13 @@ class Deck (object):
             newcard = self.pick_a_card()
             hand.insert(i, newcard)
         return hand
-        
+
+    def replenishdeck(self):
+        self.__init__(self.numdecks, self.aceishigh)
+
+    def addDeck(self):
+        self.workingdeck.extend(self.fulldeck.copy())
+
 def main():
     cont = False
     input("Welcome to Texas Hold Em. Press enter to start_ ")
@@ -293,7 +305,7 @@ def main():
         deck.show_hand(usr)
         bet = int(input("Total funds: %i\nenter a bet (1 - 5): " % money))
         deck.exchange_cards(usr, name)
-        
+
         winner, winning = deck.choosewinner(usr, cpu)
         amount = deck.winninghands.get(winning, winning) * bet
         if winner == 'Second hand':
@@ -320,7 +332,7 @@ def main():
             print("You ran out of money!")
             print("Game over")
             break
-        
+
         cont = input("Enter to play again or 'quit' to quit: ")
         subprocess.call('clear')
 
