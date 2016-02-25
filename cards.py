@@ -4,9 +4,21 @@
 # License: CC BY-SA-NC
 import random
 import subprocess
+import copy
 
-class EmptyDeckError(BaseException):
-    pass
+class DeckError():
+    class GenericError(BaseException):
+        def __str__(self):
+            return "Generic Deck Error"
+    
+    class EmptyDeckError(BaseException):
+        def __str__(self):
+            return "There are no cards left in this deck"
+    
+    class InsufficientCardsError(BaseException):
+        def __str__(self):
+            return "There are not enough cards left in this deck"
+
 
 class Deck (object):
     def __init__(self, decks=1, aceishigh=True):
@@ -34,19 +46,22 @@ class Deck (object):
 
     def pick_a_card(self):
         if not self.workingdeck:
-            raise EmptyDeckError("There are no cards left in this deck")
+            raise DeckError.EmptyDeckError()
         card = (random.choice(self.workingdeck))
         self.workingdeck.remove(card)
         return card
 
     def deal(self, number):
         if len(self.workingdeck) < number:
-            raise EmptyDeckError("There are not enough cards left in this deck.")
+            raise DeckError.InsufficientCardsError()
         cards = []
         for i in range(number):
             card = self.pick_a_card()
             cards.append(card)
         return cards
+
+    def show_deck(self):
+        print(self.workingdeck)
 
     def evaluate_hand(self, hand):
         twopair = False
@@ -251,6 +266,29 @@ class Deck (object):
         for i in hand:
             print("The {} of {}".format(i[0], i[1]))
 
+    def shuffle(self):
+        # it should be noted that the cards are always dealt at random but shuffling is possible
+        # though it is expensive as far as memory goes
+        newdeck = []
+        total = len(self.workingdeck)
+        for i in range(total):
+            choice = random.choice(self.workingdeck)
+            newdeck.append(choice)
+            self.workingdeck.remove(choice)
+        del self.workingdeck
+        self.workingdeck = copy.deepcopy(newdeck)
+        del newdeck
+    
+    def _shuffle(self):
+        decklen = len(self.workingdeck)
+        for i in range(len(self.workingdeck)):
+            r = random.randint(0, 1000)
+            self.workingdeck[i], self.workingdeck[(i + r) % decklen] = self.workingdeck[(i + r) % decklen], self.workingdeck[i]
+    
+    def reshuffle(self):
+        self.__init__(self.numdecks, self.aceishigh)
+        self.shuffl()
+    
     def show_hand(self, hand, name=None):
         if isinstance(hand, tuple):
             hand = [hand]
