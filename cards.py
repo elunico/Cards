@@ -42,7 +42,7 @@ class Deck (object):
         for i in range(decks-1):
             self.fulldeck += self.fulldeck
 
-        self.workingdeck = self.fulldeck[:]
+        self.workingdeck = copy.deepcopy(self.fulldeck)
 
     def pick_a_card(self):
         if not self.workingdeck:
