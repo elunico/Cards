@@ -6,21 +6,22 @@ import random
 import subprocess
 import copy
 
-class DeckError():
-    class GenericError(BaseException):
+
+class DeckError(object):
+    class GenericError(Exception):
         def __str__(self):
             return "Generic Deck Error"
-    
-    class EmptyDeckError(BaseException):
+
+    class EmptyDeckError(Exception):
         def __str__(self):
             return "There are no cards left in this deck"
-    
-    class InsufficientCardsError(BaseException):
+
+    class InsufficientCardsError(Exception):
         def __str__(self):
             return "There are not enough cards left in this deck"
 
 
-class Deck (object):
+class Deck(object):
     def __init__(self, decks=1, aceishigh=True):
         self.numdecks = decks
         self.aceishigh = aceishigh
@@ -96,12 +97,12 @@ class Deck (object):
             except Exception as e:
                 pass
 
-        if flush == True and royalstraight == True:
+        if flush and royalstraight:
             royalflush = True
         else:
             royalflush = False
 
-        if flush == True and straight == True:
+        if flush and straight:
             straightflush = True
         else:
             straightflush = False
@@ -278,17 +279,17 @@ class Deck (object):
         del self.workingdeck
         self.workingdeck = copy.deepcopy(newdeck)
         del newdeck
-    
+
     def _shuffle(self):
         decklen = len(self.workingdeck)
         for i in range(len(self.workingdeck)):
             r = random.randint(0, 1000)
             self.workingdeck[i], self.workingdeck[(i + r) % decklen] = self.workingdeck[(i + r) % decklen], self.workingdeck[i]
-    
+
     def reshuffle(self):
         self.__init__(self.numdecks, self.aceishigh)
-        self.shuffl()
-    
+        self.shuffle()
+
     def show_hand(self, hand, name=None):
         if isinstance(hand, tuple):
             hand = [hand]
@@ -374,21 +375,6 @@ def main():
         cont = input("Enter to play again or 'quit' to quit: ")
         subprocess.call('clear')
 
+
 if __name__ == "__main__":
     main()
-#deck = Deck()
-##print(deck.workingdeck)
-#
-#
-#d = deck.deal(5)
-#f = deck.deal(5)
-#deck.show_hand(d, 1)
-#deck.show_hand(f, 2)
-#deck.exchange_cards(d)
-#deck.exchange_cards(f)
-#deck.show_hand(d, 1)
-#deck.show_hand(f, 2)
-#print(deck.choosewinner(d, f))
-#deck.fold(d)
-#deck.fold(f)
-#print()
